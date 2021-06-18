@@ -1,23 +1,50 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+
 import './App.css';
 
-function App() {
+const Loading = () => <div>Loading...</div>;
+const Error = () => <div>Error has occured on data fetch</div>;
+const UsersList = ({ users }) => {
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>
+          <span>{`${user.first_name} ${user.last_name}`}</span>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setHasError(false);
+      try {
+        const res = await fetch(
+          'https://reqres.in/api/users',
+        );
+        const { data } = await res.json();
+        setUsers(data);
+      } catch (error) {
+        setHasError(true);
+      }
+      setIsLoading(false);
+    };
+
+    fetchUsers();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Nutrien Test App: Users List</h1>
+      {hasError && <Error />}
+      {isLoading ? <Loading /> : <UsersList users={users} />}
     </div>
   );
 }
